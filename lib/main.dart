@@ -27,10 +27,20 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
+  var favorites = <WordPair>[]; // Lista de favoritos
 
   void getNext() {
-    current = WordPair.random(); // Genera una nueva palabra aleatoria
-    notifyListeners(); // Notifica a los widgets para que se actualicen
+    current = WordPair.random();
+    notifyListeners();
+  }
+
+  void toggleFavorite() {
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+    } else {
+      favorites.add(current);
+    }
+    notifyListeners();
   }
 }
 
@@ -40,6 +50,14 @@ class MyHomePage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
 
+    // Determina el ícono del botón "Like"
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite; // Corazón lleno si es favorito
+    } else {
+      icon = Icons.favorite_border; // Corazón vacío si no es favorito
+    }
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -47,11 +65,26 @@ class MyHomePage extends StatelessWidget {
           children: [
             BigCard(pair: pair),
             SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                appState.getNext(); // Llama a la función getNext() para actualizar la palabra
-              },
-              child: Text('Next'),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Botón "Like"
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite(); // Llama a toggleFavorite()
+                  },
+                  icon: Icon(icon),
+                  label: Text('Like'),
+                ),
+                SizedBox(width: 10), // Espacio entre los botones
+                // Botón "Next"
+                ElevatedButton(
+                  onPressed: () {
+                    appState.getNext(); // Llama a getNext()
+                  },
+                  child: Text('Next'),
+                ),
+              ],
             ),
           ],
         ),
